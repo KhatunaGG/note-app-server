@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop()
+  @Prop({unique: true})
   email: string;
 
   @Prop({ select: false })

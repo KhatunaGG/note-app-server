@@ -1,16 +1,26 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+// import { CreateAuthDto } from './dto/create-auth.dto';
+// import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
-  async signUp(createAuthDto: CreateAuthDto) {
+  async signUp(createUserDto: CreateUserDto) {
     try {
-      const { email, password } = createAuthDto;
+      const { email, password } = createUserDto;
       if (!email || !password)
         throw new BadRequestException('Email address and password required');
       const existingUser = await this.userService.findOne({ email });
@@ -28,6 +38,52 @@ export class AuthService {
     }
   }
 
+  async signIn({ email, password }: CreateUserDto) {
+    console.log(email, 'email');
+    try {
+      const existingUser = await this.userService.findUserForPasswordsCompare({
+        email,
+      });
+      if (!existingUser) throw new BadRequestException('Invalid credentials');
+      const isPasswordEqual = await bcrypt.compare(
+        password,
+        existingUser.password,
+      );
+      if (!isPasswordEqual)
+        throw new BadRequestException('Invalid credentials');
+      const payload = {
+        sub: existingUser._id,
+      };
+
+      const accessToken = await this.jwtService.signAsync(payload);
+      console.log(accessToken, 'accessToken');
+      return { accessToken };
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async getCurrentUser(userId: Types.ObjectId | string) {
+    if (!userId) {
+      throw new UnauthorizedException();
+    }
+    try {
+      const currentUser = await this.userService.getById(userId);
+      // const existingCompany = await this.userService
+      //   .getById(userId)
+      //   .populate('uploadedFiles');
+      return currentUser;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /****************************** */
+
+  getAllUser() {
+    return this.userService.findAll();
+  }
+
   findAll() {
     return `This action returns all auth`;
   }
@@ -36,9 +92,9 @@ export class AuthService {
     return `This action returns a #${id} auth`;
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+  // update(id: number, updateAuthDto: UpdateAuthDto) {
+  //   return `This action updates a #${id} auth`;
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} auth`;
