@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({unique: true})
+  @Prop({ unique: true })
   email: string;
 
   @Prop({ select: false })
@@ -11,10 +11,28 @@ export class User {
 
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId }],
-    ref: 'note',
+    ref: 'Note',
     default: [],
   })
   notes: mongoose.Types.ObjectId[];
+
+  @Prop()
+  validationToken: string;
+
+  @Prop({ default: false })
+  isVerified: boolean;
+
+  @Prop()
+  validationLinkValidateDate: Date;
+
+  @Prop({ default: 0 })
+  resendCount: number;
+
+  @Prop({ default: () => new Date() })
+  resendCountResetAt: Date;
+
+  @Prop()
+  avatar?: string
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
