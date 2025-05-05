@@ -8,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { EmailSenderModule } from './email-sender/email-sender.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { NoteModule } from './note/note.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     UserModule,
     AuthModule,
     EmailSenderModule,
+    NoteModule,
   ],
   controllers: [AppController],
   providers: [AppService],
