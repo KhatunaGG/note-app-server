@@ -32,7 +32,7 @@ export class User {
   resendCountResetAt: Date;
 
   @Prop()
-  avatar?: string
+  avatar?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
