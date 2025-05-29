@@ -1,13 +1,7 @@
-import {
-  BadGatewayException,
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
 import { Model, Types } from 'mongoose';
-// import { CreateAuthDto } from 'src/auth/dto/create-auth.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -24,7 +18,7 @@ export class UserService {
   }
 
   getById(id: Types.ObjectId | string) {
-    return this.userModel.findById(id);
+    return this.userModel.findById(id).select('+password');
   }
 
   findAll() {

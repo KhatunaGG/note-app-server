@@ -4,8 +4,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-// import { CreateAuthDto } from './dto/create-auth.dto';
-// import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
@@ -64,50 +62,15 @@ export class AuthService {
     }
   }
 
-
-
-
   async signInWithGoogle(user) {
     let existingUser = await this.userService.findOne({ email: user.email });
     if (!existingUser) existingUser = await this.userService.create(user);
-      // existingUser = await this.userService.create({
-      //   ...user,
-      //   notes: [],
-      // });
-     
-
-
-      const payload = {
-        sub: existingUser._id,
-      };
-      const accessToken = await this.jwtService.signAsync(payload);
-      return accessToken
+    const payload = {
+      sub: existingUser._id,
+    };
+    const accessToken = await this.jwtService.signAsync(payload);
+    return accessToken;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   async getCurrentUser(userId: Types.ObjectId | string) {
     if (!userId) {
@@ -128,7 +91,7 @@ export class AuthService {
       if (!existingUser) throw new NotFoundException('User not found');
 
       const now = new Date();
-      const RESET_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
+      const RESET_INTERVAL = 24 * 60 * 60 * 1000;
       const MAX_RESENDS = 3;
 
       if (
@@ -140,10 +103,8 @@ export class AuthService {
           'You’ve reached the maximum number of reset link requests (3) in the last 24 hours. Try again later.',
         );
       }
-
       let newResendCount = existingUser.resendCount + 1;
       let newResetAt = existingUser.resendCountResetAt;
-
       if (
         now.getTime() - existingUser.resendCountResetAt.getTime() >
         RESET_INTERVAL
@@ -151,7 +112,6 @@ export class AuthService {
         newResendCount = 1;
         newResetAt = now;
       }
-
       const validationToken = crypto.randomUUID();
       const validationLinkValidateDate = new Date();
       validationLinkValidateDate.setTime(
@@ -179,32 +139,6 @@ export class AuthService {
       throw e;
     }
   }
-
-  // async verifyUserByLink(linkToken: string){
-  //   console.log(linkToken, "linkToken")
-  //   try {
-  //     const existingUser = await this.userService.findOne({
-  //       validationLink: linkToken,
-  //       isVerified: false,
-  //     })
-  //     if (!existingUser) {
-  //       throw new NotFoundException('User not found or already verified');
-  //     }
-
-  //     const now = new Date();
-  //     if (now > existingUser.validationLinkValidateDate) {
-  //       throw new BadRequestException(
-  //         'Verification link has expired. Please request a new one.',
-  //       );
-  //     }
-
-  //     return existingUser.email
-
-  //   } catch(e){
-  //     throw e
-  //   }
-
-  // }
 
   async resetPassword(newPassword: string, linkToken: string) {
     if (!newPassword || !linkToken) return;
@@ -238,6 +172,31 @@ export class AuthService {
     }
   }
 
+  async changePassword(
+    userId: Types.ObjectId | string,
+    oldPassword: string,
+    newPassword: string,
+  ) {
+    if (!userId) {
+      throw new UnauthorizedException();
+    }
+    try {
+      const existingUser = await this.userService.getById(userId);
+      if (!existingUser) throw new NotFoundException('User not found');
+      const isMatch = await bcrypt.compare(oldPassword, existingUser.password);
+      if (!isMatch) throw new BadRequestException('Old password is incorrect');
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      existingUser.password = hashedPassword;
+      await existingUser.save();
+
+      return { message: 'Password updated successfully' };
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
+  }
+
   /****************************** */
 
   getAllUser() {
@@ -251,10 +210,6 @@ export class AuthService {
   findOne(id: number) {
     return `This action returns a #${id} auth`;
   }
-
-  // update(id: number, updateAuthDto: UpdateAuthDto) {
-  //   return `This action updates a #${id} auth`;
-  // }
 
   remove(id: number) {
     return `This action removes a #${id} auth`;

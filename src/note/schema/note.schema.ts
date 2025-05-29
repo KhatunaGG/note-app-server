@@ -15,13 +15,6 @@ export class Note {
   @Prop()
   isArchived: boolean;
 
-  // @Prop({
-  //   type: [{ type: mongoose.Schema.Types.ObjectId }],
-  //   ref: 'User',
-  //   default: [],
-  // })
-  // userId: mongoose.Types.ObjectId[];
-
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

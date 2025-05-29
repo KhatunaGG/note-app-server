@@ -3,17 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Req,
   UseGuards,
-  Query,
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-// import { CreateAuthDto } from './dto/create-auth.dto';
-// import { UpdateAuthDto } from './dto/update-auth.dto';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { ResendLinkDto } from './dto/resend-link.dto';
@@ -57,10 +53,21 @@ export class AuthController {
   @UseGuards(GoogleGuard)
   async googleCallback(@Req() req, @Res() res) {
     const token = await this.authService.signInWithGoogle(req.user);
-    res.redirect(`${process.env.FRONT_URL}/sign-in?token=${token}`)
+    res.redirect(`${process.env.FRONT_URL}/sign-in?token=${token}`);
   }
 
-
+  @Post('/change-password')
+  @UseGuards(AuthGuard)
+  changePassword(
+    @Req() req,
+    @Body() body: { oldPassword: string; newPassword: string },
+  ) {
+    return this.authService.changePassword(
+      req.userId,
+      body.oldPassword,
+      body.newPassword,
+    );
+  }
 
   //******************** */
   @Get()
