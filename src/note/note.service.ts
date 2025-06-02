@@ -9,7 +9,6 @@ import { UpdateNoteDto } from './dto/update-note.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Note } from './schema/note.schema';
-import { AuthService } from 'src/auth/auth.service';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
