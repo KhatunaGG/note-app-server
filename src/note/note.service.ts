@@ -30,8 +30,6 @@ export class NoteService {
         userId: userId,
       });
       const noteOwner = await this.userService.getById(userId);
-      console.log(noteOwner, 'noteOwner');
-      console.log(newNote, 'newNote');
       if (!noteOwner) throw new NotFoundException('User not found');
       noteOwner.notes.push(newNote._id);
       await noteOwner.save();
