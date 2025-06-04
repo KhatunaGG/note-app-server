@@ -126,10 +126,8 @@ export class AuthService {
         resendCountResetAt: newResetAt,
       });
 
-      const fullValidationLink = `${'http://localhost:3000'}/reset-password?token=${validationToken}`;
+      const fullValidationLink = `${'https://note-app-pink-beta.vercel.app'}/reset-password?token=${validationToken}`;
       await this.emailSender.sendValidationEmail(email, fullValidationLink);
-      console.log(fullValidationLink, 'fullValidationLink');
-
       return {
         email: email,
         message: 'Validation link sent successfully. Please check your inbox.',
